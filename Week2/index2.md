@@ -1,71 +1,329 @@
-# Types of Evaluation
+# 1 - Types of Evaluation
 
-## Applicative Evaluation
+## 1.1 - Applicative Order evaluations
 
-in f(x), evaluate x first then f(x)
+evaluate the arguements first, then apply the function  
+in `f( g(x) )`, evaluate `g(x) = y` first then evaluate `g(y)`
 
-square (1+2)
---> square(3)
---> 3 * 3
---> 9
+ie.
 
-## Normal Evaluation
-in f(x), subsitute x into f
+```haskell
+square (2 + 3)
+→ square 5
+→ 5 * 5
+→ 25
+```
 
-square (1+2)
---> (1+2) * (1+2)
---> (3) * (3)
---> 9
+## 1.2 - Normal Order evaluation
 
+apply the function first, then evaluate the arguement only if needed  
+in `f( g(x) )`, create the entire expression with `g(x)` substituted into `f()`
 
-### Intuition says Applicative Evaluation is faster, however is another example:
+ie.
 
-two _ = 2
-infinity = infinity + 1
-two infinity
+```haskell
+square (2 + 3)
+→ (2 + 3) * (2 + 3)
+→ 5 * (2 + 3)
+→ 5 * 5
+→ 25
+```
 
-#### applicative evaluation:
+**To help remember: normal is not how I would normally evaluate**
 
-two infinity
-two ( infinity + 1)
-two ( (infinity + 1) + 1 )
-...
+## 1.3 - Some Intuition
 
-#### normal evaluation:
+Intuitvely: Applicative seems more effecient because the same expression is computed multiple times in normal order
 
-two ( infinity )
-2
+however take this example:
 
+```haskell
+first x y = x
+first (5+2) (10*20)
+```
 
-## Differences between the two
+Applicative would do
 
-normal will always terminate
-applicative might not
+```haskell
+first (5+2) (10*20)
+first 7 200
+7
+```
 
+Normal would do
 
-#### Church Roser Theorem
+```haskell
+first (5+2) (10*20)
+(5+2)
+7
+```
+
+Intuition to be built is that
+
+- normal order can avoid evaluating expressions that don’t contribute to the answer
+
+## 1.4 - Church Roser Theorem
 
 - if the evaluation terminates, then the two evaluation strategies will agree
 - if the expression can terminate, normal evaluation will find it
 
+For example, take this:
 
-# Tail recursion
+```haskell
+loop :: int
+loop = loop
+first 4 loop
+```
 
-?? GO OVER THIS
+applicative:
 
-Collatz is tail recursive because no computation is required after collatz computes the recursive call
+```haskell
+first 4 loop
+first 4 loop
+first 4 loop
+...
+```
+
+this is because it will try to evaluate `loop` until it evaluate `first`
+
+normal:
+
+```haskell
+first 4 loop
+4
+```
+
+## 1.5 - What Haskell actually does: Lazy Evaluating
+
+1. Delay evaluating an argument until its value is needed.
+2. Once evaluated, share the result so it doesn’t need to be calculated again.
+
+```haskell
+square ( 2+3 )
+```
+
+so:
+
+x refers to one shared, delayed calculation: `2 + 3`
+
+```haskell
+square x
+x * x
+```
+
+- multiplication needs `x`
+- haskell calculates `x` (`2+3 = 5`) and uses that same result for both occurrences
+
+```haskell
+5 * 5
+25
+```
+
+## 1.6 - Strategy comparsion
+
+![alt text](image.png)
+
+# 2 - Tail recursion
+
+Tail recursion means that the recursive call is the last operation a function performs. There is no work left to do after that call returns.
+
+## 2.1 - What is the difference between normal recursion and tail recursion?
+
+#### 2.1.1 Normal Recursion
+
+```haskell
+fact :: Integer -> Integer
+fact 0 = 1
+fact n = n * fact(n-1)
+```
+
+in normal recursion, when call stack folds back, there is a piece of computation in each layer
+
+#### 2.1.2 Tail Recursion
+
+pow2 is a method which shows returns True only if x is a power of 2
+
+```haskell
+pow2 :: Integer -> Bool
+pow2 1 = True
+pow2 x
+    | x<=0          = pow2 x/2
+    | x `mod` 2 == 0 = pow2 (x `div` 2)
+    | otherwise     = False
+```
+
+there is no other computation when the call stack folds back
+
+Because Haskell is lazy, tail recursion alone does not guarantee constant memory use. An accumulator can still build up deferred computations unless it is evaluated strictly.
+
+# 3 - Tuples
+
+A tuple groups a fixed number of values into one value. The values can have different types.
+
+```haskell
+person :: (String, Int)
+person = ("Naman", 19)
+```
+
+The type `(String, Int)` means the first value is a string and the second is an integer. The order and number of values matter.
+
+## 3.1 - Accessing Values
+
+For a pair, use `fst` and `snd`:
+
+```haskell
+fst ("Naman", 19)   -- "Naman"
+snd ("Naman", 19)   -- 19
+```
+
+For any tuple size, use pattern matching:
+
+```haskell
+getAge :: (String, Int) -> Int
+getAge (_, age) = age
+```
+
+`_` means we ignore that value.
+
+## 3.2 - Returning Multiple Results
+
+```haskell
+sumAndProduct :: Int -> Int -> (Int, Int)
+sumAndProduct x y = (x + y, x * y)
+
+sumAndProduct 3 4   -- (7, 12)
+```
+
+The function returns one tuple containing both results.
 
 
-# Tuples
 
-Some computations can output multiple values at the same time
+# 4 - Polymorphism
 
-tuples have a maximum of 64 values inside
+Polymorphism means a function can work with different types.
 
-# Polymorphism
+## 4.1 - Identity
 
-id :: forall a . a -> a
-id x = x
+The identity function returns its input unchanged:
 
-?? Go Over Identity function and this entire section
+```haskell
+identity :: a -> a
+identity x = x
+
+identity True    -- True
+identity "hi"    -- "hi"
+```
+
+`a` is a **type variable** that can represent any type. Using the same variable means the input and output have the same type.
+
+## 4.2 - Parametric Polymorphism
+
+A function has parametric polymorphism when it works with any type, without requiring particular operations on that type.
+
+```haskell
+first :: (a, b) -> a
+first (x, y) = x
+
+first (3, True)    -- 3
+first ("hi", 7)    -- "hi"
+```
+
+`a` and `b` can be different types, but do not have to be. The function simply returns the first value, regardless of its type.
+
+`identity` is also an example of parametric polymorphism.
+
+## 4.3 - Constrained Polymorphism
+
+A function has constrained polymorphism when it works with different types that satisfy a **type class constraint**.
+
+```haskell
+double :: Num a => a -> a
+double x = x + x
+
+double 3       -- 6
+double 2.5     -- 5.0
+```
+
+`Num a` means `a` must be a numeric type, because the function uses `+`.
+
+`=>` separates the constraints from the rest of the signature.
+
+Common constraints:
+
+- `Num a`: supports numeric operations such as `+` and `*`.
+- `Eq a`: supports equality comparisons using `==` and `/=`.
+- `Ord a`: supports ordering comparisons such as `<` and `>`.
+
+## 4.4 - Infix and Prefix Style
+
+**Infix** places a function or operator between its arguments. **Prefix** places it before its arguments.
+
+Operators normally use infix style. Add parentheses to use them in prefix style:
+
+```haskell
+3 + 4      -- infix
+(+) 3 4    -- prefix
+```
+
+Ordinary functions normally use prefix style. Add backticks to use a two-argument function in infix style:
+
+```haskell
+div 10 2      -- prefix
+10 `div` 2    -- infix
+```
+
+Both styles mean the same thing. An operator’s name is parenthesised when writing its type signature:
+
+```haskell
+(+) :: Num a => a -> a -> a
+```
+
+## 4.5 - Function Composition `(.)`
+
+The composition operator `(.)` is provided by `Prelude`, which is normally imported automatically.
+
+It combines two functions by passing the result of one into the other:
+
+```haskell
+(f . g) x = f (g x)
+```
+
+`g` is applied to `x`, then `f` is applied to the result.
+
+```haskell
+addOne x = x + 1
+double x = x * 2
+
+(double . addOne) 3
+-- double (addOne 3)
+-- double 4
+-- 8
+```
+
+Its type signature is:
+
+```haskell
+(.) :: (b -> c) -> (a -> b) -> a -> c
+```
+
+- `g :: a -> b`: takes the input and produces an intermediate result.
+- `f :: b -> c`: takes that intermediate result and produces the final result.
+- `f . g :: a -> c`: the combined function.
+
+Arrows associate to the right, so the signature can also be written:
+
+```haskell
+(.) :: (b -> c) -> (a -> b) -> (a -> c)
+```
+
+This means `(.)` takes two compatible functions and returns a new function. The type variables make it polymorphic.
+
+Infix and prefix forms are equivalent:
+
+```haskell
+f . g
+(.) f g
+```
+
+**Parentheses matter:** `f g x` means `(f g) x`, whereas composition uses `f (g x)`.
 

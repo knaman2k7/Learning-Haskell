@@ -22,4 +22,4 @@ roots a b c = ( (-b + d ) / e, (-b - d ) / e)
         e = 2 * a
 
 main :: IO ()
-main = roots 1.0 (-3.0) 2.0
+main = print (roots 1.0 (-3.0) (-7.0) )
