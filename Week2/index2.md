@@ -167,7 +167,21 @@ person = ("Naman", 19)
 
 The type `(String, Int)` means the first value is a string and the second is an integer. The order and number of values matter.
 
+Haskell has no conept of a single element tuple - (42) :: (Int) = 42 :: Int
+- () is a zero element tuple - called a single unit
+- (23) = 23
+- (23,4) is two element tuple
+
 ## 3.1 - Accessing Values
+
+you can use either:
+- pattern matching
+- fst or snd for two element tuples
+
+```haskell
+dist :: (Double, Double) → (Double, Double) → Double
+dist (x0, y0) (x1, y1) = sqrt ((x0 − x1) ˆ 2 + (y0 − y1) ˆ 2)
+```
 
 For a pair, use `fst` and `snd`:
 
@@ -326,4 +340,123 @@ f . g
 ```
 
 **Parentheses matter:** `f g x` means `(f g) x`, whereas composition uses `f (g x)`.
+
+
+
+
+# 5 - Lambda Abstraction
+
+```haskell
+f :: a -> b
+f x = y
+```
+
+to isolate f, we use a lamda abstraction
+
+```haskell
+f :: a -> b
+f = λ x -> y
+```
+
+
+
+consider difference between:
+
+```haskell
+add: Int -> Int -> Int
+add x y = x + y
+```
+
+```haskell
+add x y = x + y
+add x = λy -> x + y
+```
+
+```haskell
+a -> b -> c = a -> (b -> c)
+```
+
+
+```haskell
+plus :: (Int, Int) -> Int
+plus (x,y) -> x + y
+```
+
+
+
+
+
+curry :: ( (a,b) -> c) -> (a -> b -> c)
+curry f x y = f(x,y)
+
+uncurry :: (a -> b -> c) -> ( (a,b) -> c )
+uncurry g(x,y) = g x y
+
+
+??what is id subscript(int) = id@int :: Int -> Int??
+
+??what is currying??
+
+excercise:
+curry . uncurry = id
+uncurry . curry = id
+
+
+
+
+
+# 6 - Data types
+
+bool is describes as:
+
+```haskell
+data Bool where
+    True :: Bool
+    False :: Bool
+```
+
+You can use this to define your own datatypes:
+
+```haskell
+data day where
+    Monday :: day
+    Tuesday: day
+    ...
+```
+
+You can this type as any other and define functions by pattern matching
+
+```haskell
+weekend :: Day -> Bool
+weekend monday = False
+...
+weekend saturday = True
+...
+```
+
+Alternatively:
+
+```haskell
+data Day = Monday | Tuesday | Wednesday ... 
+```
+
+
+```haskell
+data Natural where
+    zero :: Natural
+    succ :: Natural -> Natural
+```
+
+
+# 7 - Type Classes
+
+
+A type class decides a family of operations undefined by a type eg.
+
+
+?? go over classes ??
+
+
+
+# Type synonyms
 
