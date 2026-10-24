@@ -1,32 +1,68 @@
-fib :: Int -> Int
-fib 0 = 0
-fib 1 = 1
-fib n = fib (n-1) + fib(n-2)
+import Data.Char (ord)
 
 
-collatz :: Integer -> IO ()
-collatz 1 = print 1
-collatz n 
-    | n <= 0 = error "Collatz is undefined for -ve values"
-    | even n = do
-        print n
-        collatz ( n `div` 2 )
-    | otherwise = do
-        print n
-        collatz ( 3*n + 1 )
+factCheck :: Integer -> Integer
+factCheck 0 = 1
+factCheck n
+    | n < 0 = error "fact: undefined on negative input"
+    | otherwise = n * factCheck (n-1)
 
 
-roots :: Double -> Double -> Double -> (Maybe Double, Maybe Double)
-roots a b c
-    | dis<0     =(Nothing, Nothing)
-    | dis==0    =(Just (-b / (2*a)), Nothing)
-    | otherwise =(Just ((-b + sqrt dis) / (2*a)), Just ((-b - sqrt dis) / (2*a)))
+sumTo :: Int -> Int
+sumTo 1 = 1
+sumTo n = 
+    if n>1 then n + sumTo (n-1)
+    else error "No Negative Values"
+
+
+findRoots :: Float -> Float -> Float -> (Float, Float)
+findRoots a b c = ( (-b+dis)/den, (-b-dis)/den )
     where
-        dis = b^2 - 4*a*c
+        dis = sqrt (b^2 - 4*a*c)
+        den = 2 * a
 
-add :: Int -> Int -> Int
-add x y = x + y
+
+rectangleStats :: Double -> Double -> (Double, Double)
+rectangleStats width height = (area, perimeter)
+    where 
+        area = width * height
+        perimeter = 2 * (width+height)
+
+myId :: a -> a
+myId x = x
+
+
+myFst :: (a,b) -> b
+myFst pair = snd pair
+
+
+duplicate :: a -> (a,a)
+duplicate x = (x,x)
+
+
+applyTwice :: (a->a) -> a -> a
+applyTwice f x = f (f x)
+
+
+iteratePair :: Int -> (a->a) -> a -> (a,a)
+iteratePair n f x
+    | n < 0 = error "Negative Values not Allowed!"
+    | otherwise = (x, helper n x)
+    where
+        helper 0 x = x
+        helper n x = helper (n-1) (f x)
+
+
+lowCod :: String -> [Int]
+lowCod [] = []
+lowCod (x:xs)
+    | lb <= uc && uc <= up                      = (uc : lowCod xs)
+    | otherwise                                 = lowCod xs
+    where
+        lb = ord 'a'
+        up = ord 'z'
+        uc = ord x
+
 
 main :: IO ()
-main =  print (add 5 (3))
-
+main = print ( lowCod "ABC123" )
