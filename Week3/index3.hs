@@ -1,6 +1,7 @@
 import Distribution.Simple.Utils (xargs)
 import Data.Binary.Get (Decoder(Fail))
 import Control.Monad.Accum (MonadAccum(add))
+import Data.ByteString (partition)
 
 reverseList :: [Int] -> [Int]
 reverseList [] = []
@@ -51,9 +52,6 @@ f n _ | n <= 0 = 0
 f n (x:xs) = 1 + f (n-1) xs
 
 
-longWords :: Int -> [String] -> [String]
-longWords n = filter (\s -> length s > 3 )
-
 
 pairProducts :: [Int] -> [Int] -> [Int]
 pairProducts = zipWith (*)
@@ -78,9 +76,6 @@ mapR f = foldr step []
     where
         step x ys = f x : ys
 
-sumSquares :: Num a => [a] -> a
-sumSquares = foldr (\x rest -> x^2 + rest) 0
-
 
 keepShiftedEven :: [Int] -> [Int]
 keepShiftedEven xs = map (+1) ( filter even xs )
@@ -92,5 +87,53 @@ kse = foldr step []
             | even x        = (x+1) : rest
             | otherwise     = rest
 
+
+mysum :: [Int] -> Int
+mysum [] = 0
+mysum (x:xs) = x + mysum xs
+
+-- myFold (function) (base case) [list]
+
+--myFold :: (a->b->b) -> a -> [b] 
+
+
+-- 1
+sumSquares :: [Int] -> Int
+sumSquares = foldr (\x rest -> x^2 + rest) 0
+
+
+-- 2
+longWords :: Int -> [String] -> [String]
+longWords n = foldr step []
+    where
+        step cur rest
+            | length cur >= n      = (cur:rest)
+            | otherwise            = rest 
+
+
+-- 3
+mapFold :: (a->b) -> [a] -> [b]
+mapFold f = foldr (\cur rest -> (f cur : rest) )[]
+
+
+-- 4
+partitionFold :: (a->Bool) -> [a] -> ([a],[a])
+partitionFold f = foldr step ([],[])
+    where
+        step cur (ts,fs)
+            | f cur         = ((cur:ts),fs)
+            | otherwise     = (ts,(cur:fs))
+
+
+-- 5
+groupRuns :: Eq a => [a] -> [[a]]
+groupRuns = foldr step []
+    where
+        step cur [] = [[cur]]
+        step cur ( (x:xs) : rest )
+            | cur == x      = ( (cur:x:xs) : rest )
+            | otherwise     = ( (cur:[]) : (x:xs) : rest )
+
+
 main :: IO ()
-main = print ( keepShiftedEven [3, 8, 14] )
+main = print ( ( sum . map (^2) ) [3,8,14] )
