@@ -135,5 +135,14 @@ groupRuns = foldr step []
             | otherwise     = ( (cur:[]) : (x:xs) : rest )
 
 
+
+myRev :: [a] -> [a]
+myRev ls = rev' ls []
+    where
+        rev' :: [a] -> [a] -> [a]
+        rev' [] ys = ys 
+        rev' (x:xs) ys = rev' xs (x : ys)
+
+
 main :: IO ()
-main = print ( ( sum . map (^2) ) [3,8,14] )
+main = print ( [3,8,14,5,1] !! 2 )
